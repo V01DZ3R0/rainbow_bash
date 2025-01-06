@@ -1,15 +1,14 @@
-// Got the pun?
+﻿// Got the pun?
 
 #include <stdio.h>
-#include <time.h> //for nanosleep
-int main(void)
-{
+#include <time.h>
 
-    int i, j, k, l;
+#define WAIT_TIME 100 // In miliseconds
+#define CLOCKS_PER_MS (CLOCKS_PER_SEC / 1000)
 
-    struct timespec wait = {0, 100000000}, left; // delay time is set in nano-seconds, variable "left" is useless
+static clock_t NextClock;
 
-    /*
+/*
    colors
    order of color like in rainbow -- its' number in  \033[3Xm  (instead of X)
                                 1 -- 1
@@ -18,33 +17,30 @@ int main(void)
                                 4 -- 6
                                 5 -- 4
                                 6 -- 5
-     */
+*/
 
-    char str[] = "RAINBOW"; // Or any other string you like
+const char dispStr[] = "RAINBOW"; // Or any other string you like
+const char clrs[] = "546231"; // order is reversed because i said so.
 
-    char clr[] = "546231"; // order is reversed because i said so.
+int main(void)
+{
+    NextClock = clock();
+    int i, dispStrLen = sizeof(dispStr) - 1, clrsLen = sizeof(clrs), currClrIndex = 0;
+
     while (69)
     {
-        j = sizeof(str) - 1;
-        l = sizeof(clr) - 1;
-        for (k = 0; k < l; k++) // iterate over all colors
+        if (((clock() - NextClock) / CLOCKS_PER_MS) < WAIT_TIME) { continue; }
+
+        for (i = 0; i < dispStrLen; i++) // iterate over all symbols
         {
-
-            for (i = 0; i < j; i++) // iterate over all letters
-            {
-                if (i + k >= l)
-                {
-                    printf("\033[3%cm %c", clr[i + k - l], str[i]);
-                    continue;
-                }
-                printf("\033[3%cm %c", clr[i + k], str[i]);
-            }
-            nanosleep(&wait, &left);
-            printf("\r\n");
+            if (currClrIndex < clrsLen) { currClrIndex++; }
+            else { currClrIndex = 0; }
+            printf("\033[3%cm %c", clrs[currClrIndex], dispStr[i]);
         }
-    }
 
-    printf("\n");
+        printf("\n");
+        NextClock = clock();
+    }
 
     return 0;
 }
